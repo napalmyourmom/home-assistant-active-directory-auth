@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1
+- Admin group membership now implies user access: a user may log in if they belong to **either** the admin group or the user group (admins no longer need to be members of both).
+
 ## 2.1.0
 - Security: bind the internal auth server to `127.0.0.1` only (was `0.0.0.0`). With `host_network: true` this keeps the credential endpoint off the LAN; Home Assistant Core still reaches it on the host loopback.
 - Security: remove the unauthenticated `/diagnose` endpoint (leaked CA subject/issuer and shelled out to `openssl`).

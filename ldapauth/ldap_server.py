@@ -122,16 +122,20 @@ def ldap_auth(username, password):
     if not conn.rebind(user=LDAP_LOOKUP_USER, password=LDAP_LOOKUP_PASSWORD):
         raise Exception("Service rebind failed")
 
-    user_group_dn = _resolve_group_dn(conn, LDAP_USER_GROUP_CN)
-    if not user_group_dn:
-        raise Exception(f"Configured user_group not found under groups_base_dn: {LDAP_USER_GROUP_CN}")
-    if not _is_member(conn, user_dn, user_group_dn):
-        raise Exception("Not in required user group")
-
+    # Admin membership implies user access: allow the login if the user is a member of
+    # EITHER the admin group or the user group. is_admin requires the admin group.
     is_admin = False
     if LDAP_ADMIN_GROUP_CN:
         admin_group_dn = _resolve_group_dn(conn, LDAP_ADMIN_GROUP_CN)
         is_admin = bool(admin_group_dn and _is_member(conn, user_dn, admin_group_dn))
+
+    user_group_dn = _resolve_group_dn(conn, LDAP_USER_GROUP_CN)
+    if not user_group_dn:
+        logger.warning(f"Configured user_group not found under groups_base_dn: {LDAP_USER_GROUP_CN}")
+    in_user_group = bool(user_group_dn and _is_member(conn, user_dn, user_group_dn))
+
+    if not (in_user_group or is_admin):
+        raise Exception("Not in required user or admin group")
 
     display = entry.displayName.value if entry.displayName else username
     email = entry.mail.value if entry.mail else ""
