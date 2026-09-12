@@ -94,7 +94,7 @@ fi
 
 ### Notes
 
-- A user can log in only if they are a **direct or nested** member of the configured `user_group`.
+- A user can log in if they are a **direct or nested** member of `user_group` **or** `admin_group` (admin membership implies user access).
 - Admin is granted only to members of `admin_group`; everyone else is provisioned as a normal user (`group = system-users`).
 - Home Assistant applies the group at user **creation** only. Changing someone's AD group afterwards does **not** re-tier an existing HA user — adjust it in Home Assistant (or delete and recreate the HA user).
 - Passwords are never stored; they are posted to the local auth server (loopback) and bound straight to AD.
